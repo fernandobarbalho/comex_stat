@@ -54,3 +54,28 @@ dados_trabalho_exportacao %>%
 
 
 #Dimensões 1026 x 729
+
+
+dados_trabalho_exportacao %>%
+  summarise(valor = sum(kg_liquido),
+            .by = co_ano) %>%
+  mutate(valor = valor/10^9) %>%
+  ggplot(aes(x= co_ano, y= valor)) +
+  geom_col(aes(fill= valor)) +
+  geom_text(aes(x=co_ano, y= valor+0.2, label= round(valor,1)), size= 3.1) +
+  scale_x_continuous(breaks = 1997:2025) +
+  scale_fill_continuous_sequential(palette = "Heat 2") +
+  theme_light() +
+  theme(
+    panel.grid = element_blank(),
+    legend.position = "bottom"
+  ) +
+  labs(
+    title = "Exportação de aço para os EUA",
+    subtitle = "Em milhões de toneladas líquidas",
+    x= "",
+    y="",
+    caption =  "Fonte: ComexStat. Elaboração própria",
+    fill = "Milhões de toneladas"
+  )
+
