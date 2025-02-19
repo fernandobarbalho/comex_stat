@@ -78,6 +78,8 @@ dados_trabalho_exportacao<-
       select(co_sh6, no_sh6_por, no_sh4_por, no_sh2_por )
   )
 
+
+saveRDS(dados_trabalho_exportacao, "dados_trabalho_exportacao.rds")
 glimpse(dados_trabalho_exportacao)
 
 
