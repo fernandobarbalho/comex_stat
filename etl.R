@@ -61,8 +61,8 @@ exportacao_aco_eua_2025<-
 
 
 ##Dados entre 1997 e 2025
-# data <- fread("exp_completa.csv")
-# data<- janitor::clean_names(data)
+data <- fread("exp_completa.csv")
+data<- janitor::clean_names(data)
 
 dados_trabalho_exportacao<-
   data %>%
@@ -84,3 +84,6 @@ glimpse(dados_trabalho_exportacao)
 
 
 names(dados_trabalho_exportacao)
+
+tibble(codigos_aco = codigos_aco_ncm)  %>%
+  writexl::write_xlsx("codigos_aco_ncm.xlsx")
