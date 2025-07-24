@@ -16,6 +16,8 @@ exp_2025 <- read_delim("EXP_2025.csv", delim = ";",
 
 ncm_sh <- janitor::clean_names(ncm_sh)
 
+saveRDS(ncm_sh, "ncm_sh.rds")
+
 ncm<- janitor::clean_names(ncm)
 
 exp_2025 <- janitor::clean_names(exp_2025)
@@ -26,6 +28,19 @@ ncm_sh$co_sh6 <-  as.factor(ncm_sh$co_sh6)
 teste<- "aqui tem pedaço"
 str_detect(teste, "\\baço\\b")
 
+exportacao_municipios <- 
+  read_delim("EXP_2024_MUN.csv", 
+                           delim = ";", escape_double = FALSE, trim_ws = TRUE) %>%
+  janitor::clean_names()
+
+saveRDS(exportacao_municipios, "exportacao_municipios.RDS" )
+
+uf_mun <- read_delim("uf_mun.csv", delim = ";", 
+                     escape_double = FALSE, locale = locale(encoding = "latin1"), 
+                     trim_ws = TRUE)%>%
+  janitor::clean_names()
+
+saveRDS(uf_mun, "uf_mun.rds")
 
 # codigos_aco<- 
 #   (ncm_sh %>%
