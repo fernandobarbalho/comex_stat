@@ -16,8 +16,6 @@ exp_2025 <- read_delim("EXP_2025.csv", delim = ";",
 
 ncm_sh <- janitor::clean_names(ncm_sh)
 
-saveRDS(ncm_sh, "ncm_sh.rds")
-
 ncm<- janitor::clean_names(ncm)
 
 exp_2025 <- janitor::clean_names(exp_2025)
@@ -28,19 +26,44 @@ ncm_sh$co_sh6 <-  as.factor(ncm_sh$co_sh6)
 teste<- "aqui tem pedaço"
 str_detect(teste, "\\baço\\b")
 
+
+pais <- read_delim("pais.csv", delim = ";", 
+                   escape_double = FALSE, locale = locale(encoding = "LATIN1"), 
+                   trim_ws = TRUE)
+
 exportacao_municipios <- 
   read_delim("EXP_2024_MUN.csv", 
-                           delim = ";", escape_double = FALSE, trim_ws = TRUE) %>%
-  janitor::clean_names()
+             delim = ";", escape_double = FALSE, trim_ws = TRUE) %>%
+  janitor::clean_names() %>%
+  mutate(co_mun = as.character(co_mun)) %>%
+  mutate(co_mun = case_when(
+    str_sub(co_mun,1,2) == "34" ~ paste0("35",str_sub(co_mun,3,7)),
+    str_sub(co_mun,1,2) == "52" ~ paste0("50",str_sub(co_mun,3,7)),
+    str_sub(co_mun,1,2) == "53" ~ paste0("52",str_sub(co_mun,3,7)),
+    str_sub(co_mun,1,2) == "54" ~ paste0("53",str_sub(co_mun,3,7)),
+    .default = co_mun
+  )) %>%
+  mutate(co_mun = as.numeric(co_mun))
 
 saveRDS(exportacao_municipios, "exportacao_municipios.RDS" )
 
-uf_mun <- read_delim("uf_mun.csv", delim = ";", 
+uf_mun <- 
+  read_delim("uf_mun.csv", delim = ";", 
                      escape_double = FALSE, locale = locale(encoding = "latin1"), 
                      trim_ws = TRUE)%>%
-  janitor::clean_names()
+  janitor::clean_names()%>%
+  mutate(co_mun_geo = as.character(co_mun_geo)) %>%
+  mutate(co_mun_geo = case_when(
+    str_sub(co_mun_geo,1,2) == "34" ~ paste0("35",str_sub(co_mun_geo,3,7)),
+    str_sub(co_mun_geo,1,2) == "52" ~ paste0("50",str_sub(co_mun_geo,3,7)),
+    str_sub(co_mun_geo,1,2) == "53" ~ paste0("52",str_sub(co_mun_geo,3,7)),
+    str_sub(co_mun_geo,1,2) == "54" ~ paste0("53",str_sub(co_mun_geo,3,7)),
+    .default = co_mun_geo
+  )) %>%
+  mutate(co_mun_geo = as.numeric(co_mun_geo))
 
 saveRDS(uf_mun, "uf_mun.rds")
+
 
 # codigos_aco<- 
 #   (ncm_sh %>%
@@ -102,3 +125,46 @@ names(dados_trabalho_exportacao)
 
 tibble(codigos_aco = codigos_aco_ncm)  %>%
   writexl::write_xlsx("codigos_aco_ncm.xlsx")
+
+gera_hora_reuniao<- function(){paste( str_pad(sample(8:18,1),2,side = "left", pad = "0"),str_pad(sample(1:59,1),2,side = "left", pad = "0"), sep=":")}
+
+gera_hora_reuniao()
+
+str_pad("9",2,side = "left", pad = "0")
+
+str_pad()
+
+
+ncm_sh %>%
+  distinct(CO_SH2,
+           NO_SH2_ING) %>%
+  readr::write_csv("sh2.csv")
+
+
+
+##O arquivo csv abaixo foi gerado a parti de consulta no deepseek
+#https://chat.deepseek.com/a/chat/s/84c2e18b-d7ce-49d8-9b3c-1ccb0d8efa83
+
+produtos_industrializados <- 
+  read_csv("produtos_industrializados.csv") %>%
+  janitor::clean_names()
+
+saveRDS(produtos_industrializados,"produtos_industrializados.rds")
+
+#Dados de exporação e importação por estado
+#https://comexstat.mdic.gov.br/pt/geral
+
+#Dados com filtro para São Paulo (estado) em 2024
+library(readxl)
+export_import_2024_sp <- 
+  read_excel("export_import_2024_sp.xlsx") %>%
+  janitor::clean_names()
+
+saveRDS(export_import_2024_sp, "export_import_2024_sp.rds")
+
+#Dados para todo o Brasil em 2024
+export_import_2024_brasil <- 
+  read_excel("export_import_2024_brasil.xlsx") %>%
+  janitor::clean_names()
+
+saveRDS(export_import_2024_brasil,"export_import_2024_brasil.rds")  
