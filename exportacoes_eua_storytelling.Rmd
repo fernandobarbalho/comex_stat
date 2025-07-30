@@ -1,3 +1,12 @@
+---
+title: "exportações eua"
+output: html_document
+date: "2025-07-28"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+
 library(geobr)
 library(tidyverse)
 library(colorspace)
@@ -7,6 +16,7 @@ library(spData)
 uf_mun <- readRDS("~/Github/comex_stat/uf_mun.rds")
 exportacao_municipios <- readRDS("~/Github/comex_stat/exportacao_municipios.RDS")
 ncm_sh <- readRDS("~/github/comex_stat/ncm_sh.rds")
+resultado_2022_partido <- readRDS("~/github/comex_stat/resultado_2022_partido.rds")
 
 data("world")
 
@@ -31,28 +41,13 @@ exportacao_municipios %>%
   mutate(valor_total =  valor_total/10^9) %>%
   slice_max(order_by = valor_total, n =100) 
 
-dados_mapa %>%
-  writexl::write_xlsx("dados_mapa.xlsx")
 
 
-
-sum(dados_mapa$valor_total)
-
-dados_mapa %>%
-  summarise(quantidade=  n(),
-            .by = sg_uf_mun) %>%
-  arrange(desc(quantidade))
-
-dados_mapa %>%
-  summarise(valor_estado=  sum(valor_total),
-            .by = sg_uf_mun) %>%
-  arrange(desc(valor_estado)) %>%
-  slice_max(order_by = valor_estado, n=7) %>%
-  summarise(sum(valor_estado))
+```
 
 
-
--43.22788 -22.87665
+```{r fig.dpi= 300, }
+tam_fonte<- 3
 
 municipios_seat %>%
   inner_join(
@@ -67,103 +62,90 @@ municipios_seat %>%
   geom_text(data = tibble(lon= -38.22788, lat=-24.87665 ) , 
             aes(x=lon, y=lat, label= str_wrap("Rio de Janeiro-RJ US$ 4,9 bi",17)),
             color = "white",
-            fontface = "bold") +
+            fontface = "bold",
+            size =tam_fonte) +
   geom_text(data = tibble(lon= -40.22788, lat=-28.87665 ) , 
             aes(x=lon, y=lat, label= str_wrap("São Paulo: 34 cidades",30)),
             color = "white",
-            fontface = "bold") +
+            fontface = "bold",
+            size =tam_fonte) +
   geom_text(data = tibble(lon= -40.22788, lat= 0 ) , 
             aes(x=lon, y=lat, label= str_wrap("NE + N + CO: 16 cidades",30)),
             color = "white",
-            fontface = "bold") +
+            fontface = "bold",
+            size =tam_fonte) +
   geom_text(data = tibble(lon= -42.22788, lat= -33 ) , 
             aes(x=lon, y=lat, label= str_wrap("SE + S: 90% do valor total entre as 100 cidades",30)),
             color = "white",
-            fontface = "bold") +
+            fontface = "bold",
+            size =tam_fonte) +
   
   scale_fill_continuous_sequential(palette = "Heat 2")+
   theme_void() +
   theme(
     panel.background = element_rect(fill= "#0077be"),
     plot.title = element_text(size =14, color = "blue", face = "bold", hjust= 0.5),
-    plot.subtitle = element_text(size =12, color = "blue", face = "bold", hjust= 0.5) 
+    plot.subtitle = element_text(size =12, color = "blue", face = "bold", hjust= 0.5),
+
   ) +
   labs(
     size = str_wrap("Valor em US$ Bi",8),
     title = "Cem cidades com maior exportação para os EUA",
     subtitle = "Ano: 2024",
-    caption = "Fonte: Comex Stat. Elaboração: VPR/DIESO"
+    caption = "Fonte: Comex Stat. Elaboração: Fernando Barbalho"
   ) +
   annotate("segment",
            x = -48.22788, y = -23.87665, xend = -40.22788, yend = -27.87665,
            arrow = arrow(length = unit(0.3, "cm"), type = "closed"),
            color = "white")
 
+```
 
-
-
-
+```{r fig.dpi= 300}
 municipios_seat %>%
   inner_join(
     dados_mapa %>%
       mutate(code_muni = as.numeric(co_mun_geo))
   ) %>%
+  inner_join(
+    resultado_2022_partido %>%
+      mutate(code_muni = id_municipio) %>%
+      select(code_muni, vencedor)
+    
+  ) %>%
   ggplot() +
   geom_sf(data = world) +
-  geom_sf(data= estados, fill = "black") +
-  geom_sf(aes( fill= valor_total), pch= 21,  color = "black", alpha = 1, size= 2 ) + #alpha= valor_total
+  geom_sf(data= estados, fill = "white") +
+  geom_sf(aes(  fill= vencedor), pch= 21,  color = "lightgray", alpha = 1, size=1 ) + #alpha= valor_total
+  geom_text(data = tibble(lon= -41.22788, lat= 4 ) , 
+            aes(x=lon, y=lat, label= str_wrap("54% dos votos para Bolsoaro (14,6 milhões de votos)",30)),
+            color = "white",
+            fontface = "bold",
+            size =tam_fonte) +
+  geom_text(data = tibble(lon= -40.22788, lat=-25.87665 ) , 
+            aes(x=lon, y=lat, label= str_wrap("No Sudeste PL venceu em 81% das cidades...",20)),
+            color = "white",
+            fontface = "bold",
+            size =tam_fonte) +
+  geom_text(data = tibble(lon= -41.22788, lat=-30.87665 ) , 
+            aes(x=lon, y=lat, label= str_wrap("... e no Sul venceu em 100%",30)),
+            color = "white",
+            fontface = "bold",
+            size =tam_fonte) +
   coord_sf(xlim = c(-75,-35), ylim=c(-33,5))+
-  scale_fill_continuous_sequential(palette = "Heat 2")+
+  scale_fill_discrete_qualitative(palette = "Dark 2", rev= TRUE) +
   theme_void() +
   theme(
-    panel.background = element_rect(fill= "#0077be")
-  )
+    panel.background = element_rect(fill= "#0077be"),
+    plot.title = element_text(size =14, color = "blue", face = "bold", hjust= 0.5),
+    plot.subtitle = element_text(size =12, color = "blue", face = "bold", hjust= 0.5),
 
+  ) +
+  labs(
+    size = str_wrap("Valor em US$ Bi",8),
+    title = "Cem cidades com maior exportação para os EUA",
+    subtitle = "Bolsonaro teve maior votação em 82 municípios *",
+    caption = "*Resultado 2º turno de  2022. Fonte: Comex Stat e TSE. Elaboração: Fernando Barbalho"
+  ) 
+```
 
-dados_mapa %>%
-      mutate(code_muni = as.numeric(co_mun_geo))%>%
-      filter(sg_uf_mun %in% c("RS", "SC", "PR")) %>%
-  inner_join(
-    resultado_2022_partido %>%
-      mutate(code_muni = id_municipio) %>%
-      select(code_muni, vencedor)
-    
-  ) %>%
-  summarise(quantidade = n(),
-            .by = vencedor)  
-
-dados_mapa %>%
-  mutate(code_muni = as.numeric(co_mun_geo))%>%
-  filter(sg_uf_mun %in% c("RJ", "MG", "ES", "SP")) %>%
-  inner_join(
-    resultado_2022_partido %>%
-      mutate(code_muni = id_municipio) %>%
-      select(code_muni, vencedor)
-    
-  ) %>%
-  summarise(quantidade = n(),
-            .by = vencedor)  
-
-
-  
-  dados_mapa %>%
-    mutate(code_muni = as.numeric(co_mun_geo))%>%
-    inner_join(
-      resultado_eleicoes_2022 %>%
-        mutate(code_muni = id_municipio) 
-    ) %>%
-    summarise(total_votacao = sum(votos),
-              .by = sigla_partido)
-
-
-  
-    
-  dados_mapa %>%
-    mutate(code_muni = as.numeric(co_mun_geo))%>%
-    inner_join(
-      resultado_eleicoes_2022 %>%
-        mutate(code_muni = id_municipio) 
-    ) %>%
-    summarise(total_votacao = sum(votos))
-  
-  
